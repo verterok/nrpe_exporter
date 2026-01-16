@@ -41,14 +41,18 @@ parts:
       - git
       - libssl-dev
       - pkg-config
+    stage-packages:
+      - libssl3
     override-build: |
       # Set up Go environment
       export CGO_ENABLED=1
       export GOFLAGS="-mod=vendor"
 
-      # Build the binary with static linking for OpenSSL
-      go build -a -ldflags '-extldflags "-static -ldl"' \
-        -o $SNAPCRAFT_PART_INSTALL/nrpe_exporter nrpe_exporter.go
+      # OpenSSL 3.0 compatibility: Define legacy FIPS functions as no-ops
+      export CGO_CFLAGS="-DFIPS_mode_set(x)=0"
+
+      # Build the binary with dynamic linking for OpenSSL
+      go build -a -o $SNAPCRAFT_PART_INSTALL/nrpe_exporter nrpe_exporter.go
 
       # Copy license
       cp LICENSE $SNAPCRAFT_PART_INSTALL/
