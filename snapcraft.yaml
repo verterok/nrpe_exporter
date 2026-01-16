@@ -1,6 +1,6 @@
 ---
 name: nrpe-exporter
-base: core20
+base: core22
 version: '0.2.6'
 summary: Prometheus exporter for NRPE commands
 description: |
