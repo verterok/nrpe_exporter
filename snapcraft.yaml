@@ -41,8 +41,6 @@ parts:
       - git
       - libssl-dev
       - pkg-config
-    stage-packages:
-      - libssl1.1
     override-build: |
       # Set up Go environment
       export CGO_ENABLED=1
