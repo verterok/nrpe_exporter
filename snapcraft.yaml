@@ -1,6 +1,6 @@
 ---
 name: nrpe-exporter
-base: core22
+base: core20
 version: '0.2.6'
 summary: Prometheus exporter for NRPE commands
 description: |
@@ -42,20 +42,15 @@ parts:
       - libssl-dev
       - pkg-config
     stage-packages:
-      - libssl3
+      - libssl1.1
     override-build: |
       # Set up Go environment
       export CGO_ENABLED=1
       export GOFLAGS="-mod=vendor"
 
-      # OpenSSL 3.0 compatibility: The vendored spacemonkeygo/openssl library
-      # uses the deprecated FIPS_mode_set() function for OpenSSL 1.x.
-      # This function was removed in OpenSSL 3.0. Since nrpe_exporter does not
-      # use FIPS mode, we define it as a no-op to allow compilation.
-      export CGO_CFLAGS="-DFIPS_mode_set(x)=0"
-
-      # Build the binary with dynamic linking for OpenSSL
-      go build -a -o $SNAPCRAFT_PART_INSTALL/nrpe_exporter nrpe_exporter.go
+      # Build the binary with static linking for OpenSSL
+      go build -a -ldflags '-extldflags "-static -ldl"' \
+        -o $SNAPCRAFT_PART_INSTALL/nrpe_exporter nrpe_exporter.go
 
       # Copy license
       cp LICENSE $SNAPCRAFT_PART_INSTALL/
