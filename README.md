@@ -17,6 +17,17 @@ will return metrics for the command 'check_load' against a locally running NRPE 
     docker build -t nrpe_exporter .
     docker run -d -p 9275:9275 --name nrpe_exporter
 
+### Building with Snap
+
+To build and install the snap package locally:
+
+    snapcraft
+    sudo snap install nrpe-exporter_*.snap --dangerous
+
+The snap will run as a daemon automatically. To view logs:
+
+    snap logs nrpe-exporter
+
 ## Configuration
 
 The nrpe_exporter requires little to no configuration.

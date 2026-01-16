@@ -1,0 +1,56 @@
+---
+name: nrpe-exporter
+base: core20
+version: '0.2.6'
+summary: Prometheus exporter for NRPE commands
+description: |
+  The NRPE exporter exposes metrics on commands sent to a running NRPE daemon.
+  It provides a Prometheus-compatible metrics endpoint that allows monitoring
+  of NRPE check results.
+
+  The exporter listens on port 9275 by default and exposes metrics via the
+  /export endpoint with query parameters for command and target.
+
+  Example usage:
+  http://localhost:9275/export?command=check_load&target=127.0.0.1:5666
+
+grade: stable
+confinement: strict
+
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+
+apps:
+  nrpe-exporter:
+    command: nrpe_exporter
+    daemon: simple
+    restart-condition: always
+    plugs:
+      - network
+      - network-bind
+
+parts:
+  nrpe-exporter:
+    plugin: go
+    source: .
+    source-type: git
+    build-snaps:
+      - go/1.17/stable
+    build-packages:
+      - git
+      - libssl-dev
+      - pkg-config
+    stage-packages:
+      - libssl1.1
+    override-build: |
+      # Set up Go environment
+      export CGO_ENABLED=1
+      export GOFLAGS="-mod=vendor"
+
+      # Build the binary with static linking for OpenSSL
+      go build -a -ldflags '-extldflags "-static -ldl"' \
+        -o $SNAPCRAFT_PART_INSTALL/nrpe_exporter nrpe_exporter.go
+
+      # Copy license
+      cp LICENSE $SNAPCRAFT_PART_INSTALL/
